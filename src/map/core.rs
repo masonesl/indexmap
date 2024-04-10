@@ -311,6 +311,14 @@ impl<K, V> IndexMapCore<K, V> {
         self.entries.push(Bucket { hash, key, value });
     }
 
+    fn push_entry_within_capacity(&mut self, hash: HashValue, key: K, value: V) -> Result<(), (K, V)> {
+        if self.entries.len() == self.entries.capacity() {
+            return Err((key, value));
+        }
+        self.entries.push(Bucket { hash, key, value });
+        Ok(())
+    }
+
     /// Insert a key-value pair in `entries` at a particular index,
     /// *without* checking whether it already exists.
     fn insert_entry(&mut self, index: usize, hash: HashValue, key: K, value: V) {
@@ -341,6 +349,28 @@ impl<K, V> IndexMapCore<K, V> {
                 debug_assert_eq!(i, self.entries.len());
                 self.push_entry(hash, key, value);
                 (i, None)
+            }
+        }
+    }
+
+    pub(crate) fn insert_full_within_capacity(
+        &mut self,
+        hash: HashValue,
+        key: K,
+        value: V,
+    ) -> Result<(usize, Option<V>), (K, V)>
+    where
+        K: Eq,
+    {
+        match self.find_or_insert(hash, &key) {
+            Ok(i) => Ok((i, Some(mem::replace(&mut self.entries[i].value, value)))),
+            Err(i) => {
+                debug_assert_eq!(i, self.entries.len());
+
+                match self.push_entry_within_capacity(hash, key, value) {
+                    Ok(_) => Ok((i, None)),
+                    Err(pair) => Err(pair),
+                }
             }
         }
     }
