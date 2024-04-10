@@ -398,6 +398,13 @@ where
         self.insert_full(key, value).1
     }
 
+    pub fn insert_within_capacity(&mut self, key: K, value: V) -> Result<Option<V>, (K, V)> {
+        match self.insert_full_within_capacity(key, value) {
+            Ok(good) => Ok(good.1),
+            Err(pair) => Err(pair),
+        }
+    }
+
     /// Insert a key-value pair in the map, and get their index.
     ///
     /// If an equivalent key already exists in the map: the key remains and
@@ -413,6 +420,16 @@ where
     pub fn insert_full(&mut self, key: K, value: V) -> (usize, Option<V>) {
         let hash = self.hash(&key);
         self.core.insert_full(hash, key, value)
+    }
+
+    pub fn insert_full_within_capacity(
+        &mut self,
+        key: K,
+        value: V
+    ) -> Result<(usize, Option<V>), (K, V)>
+    {
+        let hash = self.hash(&key);
+        self.core.insert_full_within_capacity(hash, key, value)
     }
 
     /// Insert a key-value pair in the map at its ordered position among sorted keys.
