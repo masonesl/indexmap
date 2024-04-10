@@ -42,6 +42,24 @@ fn insert() {
 }
 
 #[test]
+fn insert_within_capacity() {
+    let filler = [3, 7, 10, 14, 6, 19, 2, 18];
+    let (in_map, not_in_map, extra) = (14, 15, 16);
+    let mut map = IndexMap::with_capacity(filler.len() + 1);
+
+    for &elt in filler.iter() {
+        assert_eq!(map.insert_within_capacity(elt, elt), Ok(None));
+    }
+
+    assert_eq!(map.insert_within_capacity(in_map, in_map), Ok(Some(in_map)));
+    assert_eq!(map.insert_within_capacity(not_in_map, not_in_map), Ok(None));
+
+    assert_eq!(map.len(), map.capacity());
+
+    assert_eq!(map.insert_within_capacity(extra, extra), Err((extra, extra)));
+}
+
+#[test]
 fn insert_full() {
     let insert = vec![9, 2, 7, 1, 4, 6, 13];
     let present = vec![1, 6, 2];
