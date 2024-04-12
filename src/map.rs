@@ -461,6 +461,25 @@ where
         }
     }
 
+    pub fn insert_sorted_within_capacity(
+        &mut self,
+        key: K,
+        value: V
+    ) -> Result<(usize, Option<V>), (K, V)>
+    where
+        K: Ord
+    {
+        match self.binary_search_keys(&key) {
+            Ok(i) => Ok((i, Some(mem::replace(&mut self[i], value)))),
+            Err(i) => {
+                match self.shift_insert_within_capacity(i, key, value) {
+                    Ok(good) => Ok((i, good)),
+                    Err(pair) => Err(pair),
+                }
+            }
+        }
+    }
+
     /// Insert a key-value pair in the map at the given index.
     ///
     /// If an equivalent key already exists in the map: the key remains and
@@ -488,6 +507,20 @@ where
                 None
             }
         }
+    }
+
+    pub fn shift_insert_within_capacity(
+        &mut self,
+        index: usize,
+        key: K,
+        value: V
+    ) -> Result<Option<V>, (K, V)>
+    {
+        if self.len() == self.capacity() {
+            return Err((key, value))
+        }
+
+        Ok(self.shift_insert(index, key, value))
     }
 
     /// Get the given key’s corresponding entry in the map for insertion and/or
