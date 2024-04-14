@@ -50,13 +50,14 @@ fn insert_within_capacity() {
     for &elt in filler.iter() {
         assert_eq!(map.insert_within_capacity(elt, elt), Ok(None));
     }
+    assert_eq!(map.len(), filler.len());
 
     assert_eq!(map.insert_within_capacity(in_map, in_map), Ok(Some(in_map)));
     assert_eq!(map.insert_within_capacity(not_in_map, not_in_map), Ok(None));
 
     assert_eq!(map.len(), map.capacity());
-
     assert_eq!(map.insert_within_capacity(extra, extra), Err((extra, extra)));
+    assert_eq!(map.capacity(), filler.len() + 1);
 }
 
 #[test]
@@ -80,6 +81,32 @@ fn insert_full() {
         assert_eq!(Some(index), map.get_full(&elt).map(|x| x.0));
         assert_eq!(map.len(), len);
     }
+}
+
+#[test]
+fn insert_full_within_capacity() {
+    let filler = [5, 12, 1, 17, 9, 11, 16, 4];
+    let (in_map, not_in_map, extra) = (12, 18, 2);
+    let mut map = IndexMap::with_capacity(filler.len() + 1);
+
+    for (i, &elt) in filler.iter().enumerate() {
+        assert_eq!(map.insert_full_within_capacity(elt, elt), Ok((i, None)));
+    }
+    assert_eq!(map.len(), filler.len());
+
+    assert_eq!(map.insert_full_within_capacity(in_map, in_map),
+        Ok((map.get_index_of(&in_map).unwrap(), Some(in_map)))
+    );
+
+    assert_eq!(map.insert_full_within_capacity(not_in_map, not_in_map),
+        Ok((filler.len(), None))
+    );
+
+    assert_eq!(map.len(), map.capacity());
+    assert_eq!(map.insert_full_within_capacity(extra, extra),
+        Err((extra, extra))
+    );
+    assert_eq!(map.capacity(), filler.len() + 1);
 }
 
 #[test]
