@@ -421,6 +421,13 @@ where
         self.map.shift_insert(index, value, ()).is_none()
     }
 
+    pub fn shift_insert_within_capacity(&mut self, index: usize, value: T) -> Result<bool, T> {
+        match self.map.shift_insert_within_capacity(index, value, ()) {
+            Ok(good) => Ok(good.is_none()),
+            Err(pair) => Err(pair.0),
+        }
+    }
+
     /// Adds a value to the set, replacing the existing value, if any, that is
     /// equal to the given one, without altering its insertion order. Returns
     /// the replaced value.
