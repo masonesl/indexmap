@@ -343,6 +343,13 @@ where
         self.map.insert(value, ()).is_none()
     }
 
+    pub fn insert_within_capacity(&mut self, value: T) -> Result<bool, T> {
+        match self.map.insert_within_capacity(value, ()) {
+            Ok(good) => Ok(good.is_none()),
+            Err(pair) => Err(pair.0),
+        }
+    }
+
     /// Insert the value into the set, and get its index.
     ///
     /// If an equivalent item already exists in the set, it returns
