@@ -364,6 +364,13 @@ where
         (index, existing.is_none())
     }
 
+    pub fn insert_full_within_capacity(&mut self, value: T) -> Result<(usize, bool), T> {
+        match self.map.insert_full_within_capacity(value, ()) {
+            Ok(good) => Ok((good.0, good.1.is_none())),
+            Err(pair) => Err(pair.0),
+        }
+    }
+
     /// Insert the value into the set at its ordered position among sorted values.
     ///
     /// This is equivalent to finding the position with
