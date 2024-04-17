@@ -397,6 +397,16 @@ where
         (index, existing.is_none())
     }
 
+    pub fn insert_sorted_within_capacity(&mut self, value: T) -> Result<(usize, bool), T>
+    where
+        T: Ord,
+    {
+        match self.map.insert_sorted_within_capacity(value, ()) {
+            Ok(good) => Ok((good.0, good.1.is_none())),
+            Err(pair) => Err(pair.0),
+        }
+    }
+
     /// Insert the value into the set at the given index.
     ///
     /// If an equivalent item already exists in the set, it returns
